@@ -1,0 +1,1 @@
+This is the good known hello world in go language. :) 
