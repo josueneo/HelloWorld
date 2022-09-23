@@ -21,13 +21,7 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.18
-    
-    - name: Setup up sonarcloud
-      uses: sonarsource/sonarcloud-github-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  
+
     - name: Build program
       run: go build -v ./...
     
