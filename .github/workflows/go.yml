@@ -1,0 +1,59 @@
+name: Build Image
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  DEF_FILE: "helloworld.def"
+  OUTPUT_SIF: "helloworld.sif"
+  LIBRARY_PATH: "library:josueneo/howto/helloworld:latest"
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+    
+    - name: Setup up sonarcloud
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  
+    - name: Build program
+      run: go build -v ./...
+    
+    - name: Test program
+      run: go test -v ./...
+    
+    - name: Prepare tmp dir
+      run: |
+        echo "USER_ID=$(id -u ${USER}):$(id -g ${USER})" >> $GITHUB_ENV
+        mkdir -p ${{ github.workspace }}/tmp-sif-path
+
+    - name: Build SIF File
+      env:
+        SYLABS_AUTH_TOKEN: ${{ secrets.SYLABS_AUTH_TOKEN }}
+      uses: addnab/docker-run-action@v3
+      with:
+        image: sylabsio/scs-build:latest
+        options: -v ${{ github.workspace }}:/app -e SYLABS_AUTH_TOKEN -u ${{ env.USER_ID }}
+        run: |
+          /scs-build build /app/helloworld.def /app/${{ env.OUTPUT_SIF }}
+
+    - name: Move SIF
+      run: mv ${{ github.workspace }}/$OUTPUT_SIF ${{ github.workspace }}/tmp-sif-path/$OUTPUT_SIF
+
+    - name: Save image to github
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.OUTPUT_SIF }}
+        path: ${{ github.workspace }}/tmp-sif-path

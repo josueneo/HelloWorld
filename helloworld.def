@@ -1,0 +1,8 @@
+Bootstrap: library
+From: alpine:latest
+
+%files
+    /app/main /usr/bin
+%runscript
+    /usr/bin/main
+
