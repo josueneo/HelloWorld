@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
 
     - name: Set up Go
       uses: actions/setup-go@v3
@@ -35,9 +38,6 @@ jobs:
         mkdir -p ${{ github.workspace }}/sif/
         wget -p ${{ github.workspace }}/sif/ https://github.com/sylabs/sif/releases/download/v2.8.0/sif_2.8.0_linux_amd64.tar.gz
         tar -zxf ${{ github.workspace }}/sif/sif_2.8.0_linux_amd64.tar.gz -C ${{ github.workspace }}/sif/
-    
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
     
     - name: Build SIF File
       env:
