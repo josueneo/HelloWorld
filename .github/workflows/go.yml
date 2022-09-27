@@ -26,7 +26,7 @@ jobs:
         go-version: 1.18
 
     - name: Build program
-      run: go build -v ./...
+      run: go build -v -o main ./cmd/main.go
     
     - name: Test program
       run: go test -v ./...
