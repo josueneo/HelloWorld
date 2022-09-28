@@ -5,4 +5,3 @@ From: alpine:latest
     /app/main /usr/bin
 %runscript
     /usr/bin/main
-

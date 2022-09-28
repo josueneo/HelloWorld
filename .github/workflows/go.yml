@@ -32,9 +32,6 @@ jobs:
       run: |
         echo "USER_ID=$(id -u ${USER}):$(id -g ${USER})" >> $GITHUB_ENV
         mkdir -p ${{ github.workspace }}/tmp-sif-path
-        mkdir -p ${{ github.workspace }}/sif/
-        wget -P ${{ github.workspace }}/sif/ https://github.com/sylabs/sif/releases/download/v2.8.0/sif_2.8.0_linux_amd64.tar.gz
-        tar -zxf ${{ github.workspace }}/sif/sif_2.8.0_linux_amd64.tar.gz -C ${{ github.workspace }}/sif/
     
     - name: Build SIF File
       env:
@@ -49,14 +46,10 @@ jobs:
     - name: Move SIF
       run: mv ${{ github.workspace }}/$OUTPUT_SIF ${{ github.workspace }}/tmp-sif-path/$OUTPUT_SIF
 
-    - name: Extract SBOM
-      run: |
-        ${{ github.workspace }}/sif/siftool dump 5 ${{ github.workspace }}/tmp-sif-path/$OUTPUT_SIF > ${{ github.workspace }}/tmp-sif-path/sbom.json
-        
     - name: Scan SBOM
       uses: anchore/scan-action@v3
       with:
-        sbom: "${{ github.workspace }}/tmp-sif-path/sbom.json"
+        image: "singularity:${{ github.workspace }}/tmp-sif-path/${{ env.OUTPUT_SIF }}"
 
     - name: Save image and report to github
       uses: actions/upload-artifact@v2
