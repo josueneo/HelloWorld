@@ -1,5 +1,5 @@
 Bootstrap: library
-From: alpine:latest
+From: ubuntu:latest
 
 %files
     /app/main /usr/bin
