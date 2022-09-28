@@ -50,6 +50,7 @@ jobs:
       uses: anchore/scan-action@v3
       with:
         image: "singularity:${{ github.workspace }}/tmp-sif-path/${{ env.OUTPUT_SIF }}"
+        severity-cutoff: critical
 
     - name: Save image and report to github
       uses: actions/upload-artifact@v2
