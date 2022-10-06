@@ -13,6 +13,7 @@ env:
   SINGULARITY_VERSION: "3.10.2"
   SYLABS_AUTH_TOKEN: ${{ secrets.SYLABS_AUTH_TOKEN }}
   GOLANG_IMAGE: "library://josue-sylabs/devtools/golang:1.19.2"
+  SCS_BUILDER: "library://josue-sylabs/devtools/scs-build:0.7.5"
 jobs:
 
   build:
@@ -37,12 +38,11 @@ jobs:
     
     - name: Prepare environment
       run: |
-        #echo "USER_ID=$(id -u ${USER}):$(id -g ${USER})" >> $GITHUB_ENV
         mkdir -p ${{ github.workspace }}/tmp-sif-path
     
     - name: Build SIF image
       run: |
-        singularity run docker://sylabsio/scs-build:latest build helloworld.def helloworld.sif
+        singularity run $SCS_BUILDER build helloworld.def ${{ github.workspace }}/tmp-sif-path/helloworld.sif
 
     - name: Scan source code with grype
       uses: anchore/scan-action@v3
