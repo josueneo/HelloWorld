@@ -20,16 +20,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-
     #- name: Set up Go
     #  uses: actions/setup-go@v3
     #  with:
     #    go-version: 1.18
     - name: Install singularity
       run: |
-        wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce_${SINGULARITY_VERSION}-jammy_amd64.deb
+        wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce_${SINGULARITY_VERSION}-focal_amd64.deb
         sudo dpkg -i singularity-ce_${SINGULARITY_VERSION}-focal_amd64.deb
 
     - name: Build program
@@ -43,20 +40,9 @@ jobs:
         #echo "USER_ID=$(id -u ${USER}):$(id -g ${USER})" >> $GITHUB_ENV
         mkdir -p ${{ github.workspace }}/tmp-sif-path
     
-    - name: Build SIF DEF_FILE
+    - name: Build SIF image
       run: |
-        singularity build -r helloworld.sif helloworld.def
-
-    #- name: Build SIF File
-    #  uses: addnab/docker-run-action@v3
-    #  with:
-    #    image: sylabsio/scs-build:latest
-    #    options: -v ${{ github.workspace }}:/app -e SYLABS_AUTH_TOKEN -u ${{ env.USER_ID }}
-    #    run: |
-    #      /scs-build build /app/helloworld.def /app/${{ env.OUTPUT_SIF }}
-
-    #- name: Move SIF
-    #  run: mv ${{ github.workspace }}/$OUTPUT_SIF ${{ github.workspace }}/tmp-sif-path/$OUTPUT_SIF
+        singularity run docker://sylabsio/scs-build:latest build helloworld.def helloworld.sif
 
     - name: Scan source code with grype
       uses: anchore/scan-action@v3
