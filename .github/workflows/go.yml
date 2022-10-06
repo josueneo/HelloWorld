@@ -10,7 +10,7 @@ env:
   DEF_FILE: "helloworld.def"
   OUTPUT_SIF: "helloworld.sif"
   LIBRARY_PATH: "library:josueneo/howto/helloworld:latest"
-  SINGULARITY_VERSION: "3.10.2"
+  SINGULARITY_VERSION: "3.10.3"
   SYLABS_AUTH_TOKEN: ${{ secrets.SYLABS_AUTH_TOKEN }}
   GOLANG_IMAGE: "library://josue-sylabs/devtools/golang:1.19.2"
   SCS_BUILDER: "library://josue-sylabs/devtools/scs-build:0.7.5"
