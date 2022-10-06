@@ -22,7 +22,7 @@ jobs:
 
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
-      
+
     #- name: Set up Go
     #  uses: actions/setup-go@v3
     #  with:
@@ -30,7 +30,7 @@ jobs:
     - name: Install singularity
       run: |
         wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce_${SINGULARITY_VERSION}-jammy_amd64.deb
-        sudo dpkg -i singularity-ce_${SINGULARITY_VERSION}-jammy_amd64.deb
+        sudo dpkg -i singularity-ce_${SINGULARITY_VERSION}-focal_amd64.deb
 
     - name: Build program
       run: singularity run $GOLANG_IMAGE go build -v -o helloworld ./cmd/main.go
