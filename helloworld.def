@@ -2,6 +2,6 @@ Bootstrap: library
 From: ubuntu:latest
 
 %files
-    /app/main /usr/bin
+    helloworld /usr/bin
 %runscript
-    /usr/bin/main
+    /usr/bin/helloworld

@@ -10,6 +10,9 @@ env:
   DEF_FILE: "helloworld.def"
   OUTPUT_SIF: "helloworld.sif"
   LIBRARY_PATH: "library:josueneo/howto/helloworld:latest"
+  SINGULARITY_VERSION: "3.10.2"
+  SYLABS_AUTH_TOKEN: ${{ secrets.SYLABS_AUTH_TOKEN }}
+  GOLANG_IMAGE: "library://josue-sylabs/devtools/golang:1.19.2"
 jobs:
 
   build:
@@ -17,36 +20,48 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
+    #- name: Set up Go
+    #  uses: actions/setup-go@v3
+    #  with:
+    #    go-version: 1.18
+    - name: Install singularity
+      run: |
+        wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce_${SINGULARITY_VERSION}-jammy_amd64.deb
+        sudo apt install singularity-ce_${SINGULARITY_VERSION}-jammy_amd64.deb
 
     - name: Build program
-      run: go build -v -o main ./cmd/main.go
+      run: singularity run $GOLANG_IMAGE go build -v -o helloworld ./cmd/main.go
     
     - name: Test program
-      run: go test -v ./...
+      run: singularity run $GOLANG_IMAGE go test -v ./...
     
     - name: Prepare environment
       run: |
-        echo "USER_ID=$(id -u ${USER}):$(id -g ${USER})" >> $GITHUB_ENV
+        #echo "USER_ID=$(id -u ${USER}):$(id -g ${USER})" >> $GITHUB_ENV
         mkdir -p ${{ github.workspace }}/tmp-sif-path
     
-    - name: Build SIF File
-      env:
-        SYLABS_AUTH_TOKEN: ${{ secrets.SYLABS_AUTH_TOKEN }}
-      uses: addnab/docker-run-action@v3
+    - name: Build SIF DEF_FILE
+      run: |
+        singularity build -r helloworld.sif helloworld.def
+
+    #- name: Build SIF File
+    #  uses: addnab/docker-run-action@v3
+    #  with:
+    #    image: sylabsio/scs-build:latest
+    #    options: -v ${{ github.workspace }}:/app -e SYLABS_AUTH_TOKEN -u ${{ env.USER_ID }}
+    #    run: |
+    #      /scs-build build /app/helloworld.def /app/${{ env.OUTPUT_SIF }}
+
+    #- name: Move SIF
+    #  run: mv ${{ github.workspace }}/$OUTPUT_SIF ${{ github.workspace }}/tmp-sif-path/$OUTPUT_SIF
+
+    - name: Scan source code with grype
+      uses: anchore/scan-action@v3
       with:
-        image: sylabsio/scs-build:latest
-        options: -v ${{ github.workspace }}:/app -e SYLABS_AUTH_TOKEN -u ${{ env.USER_ID }}
-        run: |
-          /scs-build build /app/helloworld.def /app/${{ env.OUTPUT_SIF }}
+        path: "${{ github.workspace }}"
+        severity-cutoff: critical
 
-    - name: Move SIF
-      run: mv ${{ github.workspace }}/$OUTPUT_SIF ${{ github.workspace }}/tmp-sif-path/$OUTPUT_SIF
-
-    - name: Scan SBOM
+    - name: Scan SIF with grype
       uses: anchore/scan-action@v3
       with:
         image: "singularity:${{ github.workspace }}/tmp-sif-path/${{ env.OUTPUT_SIF }}"
