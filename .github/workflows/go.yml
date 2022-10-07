@@ -24,7 +24,7 @@ jobs:
       run: |
         mkdir {tmp,tmp-sif-path}
         pushd tmp
-        wget https://github.com/sylabs/scs-build-client/releases/download/v${SCS_BUILD_VERSION}/scs-build-client_0.7.5_linux_amd64.tar.gz
+        wget https://github.com/sylabs/scs-build-client/releases/download/v${SCS_BUILDER_VERSION}/scs-build-client_{SCS_BUILDER_VERSION}_linux_amd64.tar.gz
         tar -zxf scs-build-client_${SCS_BUILDER_VERSION}_linux_amd64.tar.gz
         sudo cp scs-build /usr/bin/
         popd        
