@@ -1,7 +1,20 @@
 Bootstrap: library
-From: ubuntu:latest
+From: josue-sylabs/devtools/golang:1.19.2
+Stage: build
 
 %files
-    helloworld /usr/bin
+    . /src
+%post
+    cd /src
+    go test ./...
+    go build -v -o /usr/bin/main ./cmd/main.go
+
+Bootstrap: library
+From: alpine
+Stage: final
+
+%files from build
+    /usr/bin/main
+
 %runscript
-    /usr/bin/helloworld
+    /usr/bin/main

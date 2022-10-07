@@ -10,10 +10,9 @@ env:
   DEF_FILE: "helloworld.def"
   OUTPUT_SIF: "helloworld.sif"
   LIBRARY_PATH: "library:josueneo/howto/helloworld:latest"
-  SINGULARITY_VERSION: "3.10.3"
+  SCS_BUILDER_VERSION: "0.7.5"
   SYLABS_AUTH_TOKEN: ${{ secrets.SYLABS_AUTH_TOKEN }}
   GOLANG_IMAGE: "library://josue-sylabs/devtools/golang:1.19.2"
-  SCS_BUILDER: "library://josue-sylabs/devtools/scs-build:0.7.5"
 jobs:
 
   build:
@@ -21,28 +20,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    #- name: Set up Go
-    #  uses: actions/setup-go@v3
-    #  with:
-    #    go-version: 1.18
-    - name: Install singularity
+    - name: Install scs-build
       run: |
-        wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce_${SINGULARITY_VERSION}-focal_amd64.deb
-        sudo dpkg -i singularity-ce_${SINGULARITY_VERSION}-focal_amd64.deb
+        mkdir {tmp,tmp-sif-path}
+        pushd tmp
+        wget https://github.com/sylabs/scs-build-client/releases/download/v${SCS_BUILD_VERSION}/scs-build-client_0.7.5_linux_amd64.tar.gz
+        tar -zxf scs-build-client_${SCS_BUILDER_VERSION}_linux_amd64.tar.gz
+        sudo cp scs-build /usr/bin/
+        popd        
 
-    - name: Build program
-      run: singularity run $GOLANG_IMAGE go build -v -o helloworld ./cmd/main.go
-    
-    - name: Test program
-      run: singularity run $GOLANG_IMAGE go test -v ./...
-    
-    - name: Prepare environment
-      run: |
-        mkdir -p ${{ github.workspace }}/tmp-sif-path
-    
-    - name: Build SIF image
-      run: |
-        singularity run $SCS_BUILDER build helloworld.def ${{ github.workspace }}/tmp-sif-path/helloworld.sif
+    - name: Build program and image
+      run: scs-build build $DEF_FILE ${{ github.workspace }}/tmp-sif-path/$OUTPUT_SIF
 
     - name: Scan source code with grype
       uses: anchore/scan-action@v3
@@ -56,7 +44,7 @@ jobs:
         image: "singularity:${{ github.workspace }}/tmp-sif-path/${{ env.OUTPUT_SIF }}"
         severity-cutoff: critical
 
-    - name: Save image and report to github
+    - name: Save artifacts
       uses: actions/upload-artifact@v2
       with:
         name: ${{ env.OUTPUT_SIF }}
