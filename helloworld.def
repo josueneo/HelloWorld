@@ -10,7 +10,7 @@ Stage: build
     go build -v -o /usr/bin/main ./cmd/main.go
 
 Bootstrap: library
-From: alpine
+From: josue-sylabs/devtools/alpine:3.16.2
 Stage: final
 
 %files from build
