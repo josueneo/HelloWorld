@@ -29,7 +29,7 @@ jobs:
         sudo cp scs-build /usr/bin/
         popd        
 
-    - name: Build program and image
+    - name: Compile program and build image
       run: scs-build build $DEF_FILE ${{ github.workspace }}/tmp-sif-path/$OUTPUT_SIF
 
     - name: Scan source code with grype

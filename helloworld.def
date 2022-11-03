@@ -1,5 +1,5 @@
 Bootstrap: library
-From: josue-sylabs/devtools/golang:1.19.2
+From: josue-sylabs/devtools/golang:1.19.3
 Stage: build
 
 %files
